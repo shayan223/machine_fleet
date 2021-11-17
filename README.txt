@@ -3,6 +3,8 @@ to choose how many machines each one gets as well as the max timesteps.
 
 The simulation then operates the machines on each time step and checks for breakage
 
+
+
 TODO (Phase 1):
 *Add inventory
 *Add money (well, its just a single variable, but theres nothing to use it on yet)

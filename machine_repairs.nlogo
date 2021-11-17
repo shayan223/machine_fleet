@@ -1,19 +1,23 @@
-globals [co-count pComp1 pComp2]
+globals [co-count]
 
 
 breed [companies company]
 breed [customers costumer]
-companies-own [machines]
-;;can't figure out how to give ownership of individual
-;;parts to machines because they are already owned, so this is a temporary workaround
-;;this means all machines act under a single probability, and individual parts are not accounted for
-patches-own [break-chance]
+breed [inventories inventory]
+breed [machines machine]
+
+undirected-link-breed [machine-links machine-link]
+undirected-link-breed [inventory-links inventory-link]
+
+companies-own [my_machines funds]
+machines-own[status break-chance]
+inventories-own[stock]
+
 
 to setup
   clear-all
 
   set co-count 2 ;;start with just 2 companies in competition, think about upscaling later
-  ;;set initial-machines 1
 
 
   create-companies 1 [
@@ -21,16 +25,47 @@ to setup
     set shape "circle"
     ;;this generates straight lines of machines patches for the companies
     ;;initial-machines is a "chooser" ui element
-    set machines patches with [pycor = 11 and pxcor < (min-pxcor + initial-machines) ]
+    set my_machines patches with [pycor = 11 and pxcor < (min-pxcor + initial-machines) ]
+
   ]
 
   create-companies 1 [
     setxy 0 -8
     set shape "circle"
-    set machines patches with [pycor = -11 and pxcor < (min-pxcor + initial-machines) ]
+    set my_machines patches with [pycor = -11 and pxcor < (min-pxcor + initial-machines) ]
   ]
 
-  ask companies [ask machines [set pcolor green]]
+  create-inventories 1 [
+    setxy -6 8
+    set shape "star"
+    set stock starting-stock
+    create-inventory-link-with company 0
+  ]
+
+  create-inventories 1 [
+    setxy -6 -8
+    set shape "star"
+    set stock starting-stock
+    create-inventory-link-with company 1
+  ]
+
+  create-machines initial-machines [
+    move-to one-of patches with [pycor > 8]
+    set shape "square"
+    set color green
+    set status "working"
+    create-machine-link-with company 0
+  ]
+
+    create-machines initial-machines [
+    move-to one-of patches with [pycor < -8]
+    set shape "square"
+    set color green
+    set status "working"
+    create-machine-link-with company 1
+  ]
+
+
 
 
   reset-ticks
@@ -41,19 +76,27 @@ to go
   loop[
     if ticks >= max-ticks [ stop ]
     operate
+    maintain
     tick
   ]
 end
 
 ;;runs all working machines and applies chance of breakage
 to operate
-  ask patches with [pcolor = green] [
-      if random 100 < 50 [set pcolor red]
+  ask machines with [color = green] [
+      if random 100 < 50 [
+      set color red
+      set status "broken"
+    ]
   ]
 end
 
+to maintain
+  ask companies [
+     show my-links
+  ]
 
-
+end
 
 
 
@@ -140,7 +183,29 @@ INPUTBOX
 181
 271
 initial-machines
-2.0
+5.0
+1
+0
+Number
+
+INPUTBOX
+19
+396
+174
+456
+starting-funds
+1000.0
+1
+0
+Number
+
+INPUTBOX
+60
+497
+215
+557
+starting-stock
+10.0
 1
 0
 Number
