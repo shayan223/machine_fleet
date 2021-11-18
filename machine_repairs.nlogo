@@ -3,15 +3,13 @@ globals [co-count]
 
 breed [companies company]
 breed [customers costumer]
-breed [inventories inventory]
 breed [machines machine]
 
 undirected-link-breed [machine-links machine-link]
 undirected-link-breed [inventory-links inventory-link]
 
-companies-own [my_machines funds]
+companies-own [funds parts]
 machines-own[status break-chance]
-inventories-own[stock]
 
 
 to setup
@@ -23,30 +21,13 @@ to setup
   create-companies 1 [
     setxy 0 8
     set shape "circle"
-    ;;this generates straight lines of machines patches for the companies
-    ;;initial-machines is a "chooser" ui element
-    set my_machines patches with [pycor = 11 and pxcor < (min-pxcor + initial-machines) ]
-
+    set parts starting-stock
   ]
 
   create-companies 1 [
     setxy 0 -8
     set shape "circle"
-    set my_machines patches with [pycor = -11 and pxcor < (min-pxcor + initial-machines) ]
-  ]
-
-  create-inventories 1 [
-    setxy -6 8
-    set shape "star"
-    set stock starting-stock
-    create-inventory-link-with company 0
-  ]
-
-  create-inventories 1 [
-    setxy -6 -8
-    set shape "star"
-    set stock starting-stock
-    create-inventory-link-with company 1
+    set parts starting-stock
   ]
 
   create-machines initial-machines [
@@ -83,20 +64,44 @@ end
 
 ;;runs all working machines and applies chance of breakage
 to operate
-  ask machines with [color = green] [
-      if random 100 < 50 [
+  ask machines with [status = "working"] [
+      if random 100 < break-probability [
       set color red
       set status "broken"
     ]
   ]
 end
 
-to maintain
-  ask companies [
-     show my-links
-  ]
 
+;;Check and repair all machines if company has the requisite parts
+;;all commented code below are displays for debugging purposes
+to maintain
+  let repair-flag false
+  ask machines [
+    ;;let repair-flag false
+    let temp-machine who
+    if status = "broken" [
+      ask my-machine-links [ask other-end [
+        show parts
+        if parts > 0 [
+          set repair-flag true
+          set parts  (parts - 1)
+          ;;type "Current machine:" type temp-machine
+          ;;type "number of parts:" type parts
+        ]
+      ]]
+    ]
+    if repair-flag = true [
+      set status "working"
+      set color green
+      ;;type "who=" type who
+      ;;show "Machine fixed!"
+    ]
+    set repair-flag false
+  ]
 end
+
+
 
 
 
@@ -200,11 +205,41 @@ starting-funds
 Number
 
 INPUTBOX
-60
-497
-215
-557
+17
+477
+172
+537
 starting-stock
+20.0
+1
+0
+Number
+
+PLOT
+660
+27
+956
+255
+Parts per Company
+Time
+Parts
+0.0
+20.0
+0.0
+15.0
+true
+true
+"" ""
+PENS
+"default" 1.0 0 -2674135 true "" "plot [parts] of company 0"
+"pen-1" 1.0 0 -14439633 true "" "plot [parts] of company 1"
+
+INPUTBOX
+265
+475
+420
+535
+break-probability
 10.0
 1
 0
