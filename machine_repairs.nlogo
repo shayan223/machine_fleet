@@ -52,12 +52,14 @@ to setup
   reset-ticks
 end
 
-
+;;TODO Which first, restock or upkeep?
 to go
   loop[
     if ticks >= max-ticks [ stop ]
     operate
     maintain
+    restock order-size
+    upkeep part-cost
     tick
   ]
 end
@@ -101,11 +103,26 @@ to maintain
   ]
 end
 
+;;Restock missing parts
+;;TODO delay with lead time
+;;TODO think about restock policy
+to restock [buy-amount]
+  ask companies [
+    if (parts < restock-threshold) and (funds - (part-cost * buy-amount) >= 0)  [
+       set parts (parts + buy-amount)
+       set funds (funds - (part-cost * buy-amount))
+    ]
+  ]
+end
 
 
 
-
-
+;;applies upkeep to reserve parts on every time step
+to upkeep [upkeep-cost]
+  ask companies [
+    set funds (funds - upkeep-cost * parts)
+  ]
+end
 
 
 
@@ -172,10 +189,10 @@ NIL
 1
 
 INPUTBOX
-25
-301
-161
-361
+113
+209
+173
+269
 max-ticks
 20.0
 1
@@ -183,10 +200,10 @@ max-ticks
 Number
 
 INPUTBOX
-25
-211
-181
-271
+10
+209
+102
+269
 initial-machines
 5.0
 1
@@ -194,10 +211,10 @@ initial-machines
 Number
 
 INPUTBOX
-19
-396
-174
-456
+10
+279
+91
+339
 starting-funds
 1000.0
 1
@@ -205,10 +222,10 @@ starting-funds
 Number
 
 INPUTBOX
-17
-477
-172
-537
+103
+280
+180
+340
 starting-stock
 20.0
 1
@@ -216,10 +233,10 @@ starting-stock
 Number
 
 PLOT
-660
-27
-956
-255
+659
+12
+955
+240
 Parts per Company
 Time
 Parts
@@ -231,19 +248,82 @@ true
 true
 "" ""
 PENS
-"default" 1.0 0 -2674135 true "" "plot [parts] of company 0"
-"pen-1" 1.0 0 -14439633 true "" "plot [parts] of company 1"
+"company 1" 1.0 0 -2674135 true "" "plot [parts] of company 0"
+"company 2" 1.0 0 -14439633 true "" "plot [parts] of company 1"
 
 INPUTBOX
-265
-475
-420
-535
+84
+351
+179
+411
 break-probability
 10.0
 1
 0
 Number
+
+INPUTBOX
+10
+351
+72
+411
+part-cost
+2.0
+1
+0
+Number
+
+INPUTBOX
+8
+487
+107
+547
+restock-threshold
+3.0
+1
+0
+Number
+
+INPUTBOX
+9
+420
+74
+480
+part-cost
+2.0
+1
+0
+Number
+
+INPUTBOX
+90
+420
+157
+480
+order-size
+3.0
+1
+0
+Number
+
+PLOT
+658
+257
+934
+453
+plot 1
+Time
+Funds
+0.0
+20.0
+0.0
+20.0
+true
+false
+"" ""
+PENS
+"company 1" 1.0 0 -5298144 true "" "plot [funds] of company 0"
+"company 2" 1.0 0 -14439633 true "" "plot [funds] of company 1"
 
 @#$#@#$#@
 ## WHAT IS IT?

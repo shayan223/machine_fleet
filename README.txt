@@ -5,7 +5,7 @@ The simulation then operates the machines on each time step and checks for break
 
 
 
-TODO (Phase 1):
+TODO (Phase 1): COMPLETED
 *Add inventory
 *Add money (well, its just a single variable, but theres nothing to use it on yet)
 *Add ability to buy parts
@@ -14,6 +14,7 @@ TODO (Phase 1):
 
 
 TODO: (Phase 2):
+*Add purchase lead time
 *Introduce customers to pay for service
 *Track breakage to change customer distribution probability
 *Add ability to track different parts or part types (perhaps) with different costs
