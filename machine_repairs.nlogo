@@ -1,17 +1,21 @@
-globals [co-count]
+globals [co-count buyflag0 buyflag1]
 
 
 breed [companies company]
-breed [customers costumer]
+breed [customers customer]
 breed [machines machine]
+breed [stockers stocker]
 
 undirected-link-breed [machine-links machine-link]
 undirected-link-breed [inventory-links inventory-link]
+undirected-link-breed [shipping-links shipping-link]
 
-companies-own [funds parts]
+companies-own [funds parts running-machines]
 machines-own[status break-chance]
+stockers-own[shiptime order-amount]
 
-
+;;SETUP FUNCTION
+;;/////////////////////////////////////////////////////////////////////////////////////////////////////////
 to setup
   clear-all
 
@@ -22,12 +26,14 @@ to setup
     setxy 0 8
     set shape "circle"
     set parts starting-stock
+    set funds starting-funds
   ]
 
   create-companies 1 [
     setxy 0 -8
     set shape "circle"
     set parts starting-stock
+    set funds starting-funds
   ]
 
   create-machines initial-machines [
@@ -47,10 +53,9 @@ to setup
   ]
 
 
-
-
   reset-ticks
 end
+;;//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ;;TODO Which first, restock or upkeep?
 to go
@@ -58,8 +63,10 @@ to go
     if ticks >= max-ticks [ stop ]
     operate
     maintain
+    profit
     restock order-size
-    upkeep part-cost
+    store
+    buy-machines
     tick
   ]
 end
@@ -108,7 +115,7 @@ end
 ;;TODO think about restock policy
 to restock [buy-amount]
   ask companies [
-    if (parts < restock-threshold) and (funds - (part-cost * buy-amount) >= 0)  [
+    if (parts < restock-threshold) and (funds - (part-cost * buy-amount) >= 0)[
        set parts (parts + buy-amount)
        set funds (funds - (part-cost * buy-amount))
     ]
@@ -117,15 +124,79 @@ end
 
 
 
-;;applies upkeep to reserve parts on every time step
-to upkeep [upkeep-cost]
-  ask companies [
-    set funds (funds - upkeep-cost * parts)
+;;;applies upkeep to reserve parts on every time step
+;to upkeep [upkeep-cost]
+;  ask companies [
+;    set funds (funds - upkeep-cost * parts)
+;  ]
+;end
+
+;;companies earn a fixed amount per machine per time step.
+to profit
+  ask companies[
+    set running-machines 0
+    ask my-machine-links [ ask other-end [
+      show status
+      if status = "working"[
+        ask my-machine-links[ask other-end[
+         set running-machines (running-machines + 1)
+        ]]
+      ]
+    ]]
+    set funds (funds + running-machines * machine-revenue)
   ]
 end
 
+to store
+  ask companies [
+    if funds > 0 [
+      set funds (funds - (parts * storage-fees))
+    ]
+  ]
+end
 
+;; If the company has at least 1000 dollars, the company buys another machine at a cost of 500
+to buy-machines
 
+  ask company 0 [
+    if funds > 1000 [
+      set buyflag0 true
+  ]]
+
+  if buyflag0 = true [
+      create-machines 1 [
+        move-to one-of patches with [pycor > 8]
+        set shape "square"
+        set color green
+        set status "working"
+        create-machine-link-with company 0
+    ]
+    ask company 0 [
+      set funds (funds - 500)
+      set buyflag0 false
+    ]
+  ]
+
+  ask company 1 [
+    if funds > 1000 [
+      set buyflag1 true
+  ]]
+
+  if buyflag1 = true [
+      create-machines 1 [
+        move-to one-of patches with [pycor < -8]
+        set shape "square"
+        set color green
+        set status "working"
+        create-machine-link-with company 1
+    ]
+    ask company 1 [
+      set funds (funds - 500)
+      set buyflag1 false
+    ]
+  ]
+
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -194,7 +265,7 @@ INPUTBOX
 173
 269
 max-ticks
-20.0
+200.0
 1
 0
 Number
@@ -216,7 +287,7 @@ INPUTBOX
 91
 339
 starting-funds
-1000.0
+100.0
 1
 0
 Number
@@ -227,7 +298,7 @@ INPUTBOX
 180
 340
 starting-stock
-20.0
+25.0
 1
 0
 Number
@@ -257,7 +328,7 @@ INPUTBOX
 179
 411
 break-probability
-10.0
+5.0
 1
 0
 Number
@@ -268,7 +339,7 @@ INPUTBOX
 72
 411
 part-cost
-2.0
+15.0
 1
 0
 Number
@@ -279,7 +350,7 @@ INPUTBOX
 107
 547
 restock-threshold
-3.0
+1.0
 1
 0
 Number
@@ -290,7 +361,7 @@ INPUTBOX
 74
 480
 part-cost
-2.0
+15.0
 1
 0
 Number
@@ -301,7 +372,7 @@ INPUTBOX
 157
 480
 order-size
-3.0
+5.0
 1
 0
 Number
@@ -324,6 +395,28 @@ false
 PENS
 "company 1" 1.0 0 -5298144 true "" "plot [funds] of company 0"
 "company 2" 1.0 0 -14439633 true "" "plot [funds] of company 1"
+
+INPUTBOX
+8
+554
+163
+614
+machine-revenue
+5.0
+1
+0
+Number
+
+INPUTBOX
+0
+632
+241
+692
+storage-fees
+0.5
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
