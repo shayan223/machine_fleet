@@ -10,7 +10,7 @@ undirected-link-breed [machine-links machine-link]
 undirected-link-breed [inventory-links inventory-link]
 undirected-link-breed [shipping-links shipping-link]
 
-companies-own [funds parts running-machines incoming-parts net-worth total-machines]
+companies-own [funds parts running-machines incoming-parts net-worth total-machines market-share]
 machines-own[status break-chance]
 stockers-own[ship-time order-amount newest?]
 
@@ -29,7 +29,7 @@ to setup
     set funds starting-funds
     set total-machines initial-machines
     set net-worth starting-funds
-
+    set market-share 1
   ]
 
   create-companies 1 [
@@ -39,7 +39,7 @@ to setup
     set funds starting-funds
     set total-machines initial-machines
     set net-worth starting-funds
-
+    set market-share 1
   ]
 
   create-machines initial-machines [
@@ -75,6 +75,7 @@ to go
     stock
     buy-machines
     find-worth
+    if compete? [update-market-share]
     tick
   ]
 end
@@ -204,6 +205,7 @@ end
 
 ;;companies earn a fixed amount per machine per time step.
 to profit
+
   ask companies[
     set running-machines 0
     ask my-machine-links [ ask other-end [
@@ -214,7 +216,11 @@ to profit
         ]]
       ]
     ]]
-    set funds (funds + running-machines * machine-revenue)
+
+    ifelse compete?
+        [set funds (funds + running-machines * machine-revenue * market-share)]
+    ;;else
+        [set funds (funds + running-machines * machine-revenue)]
   ]
 end
 
@@ -280,10 +286,21 @@ to find-worth
   ]
 end
 
+;;each company will adjust its revenue based on how well it is doing
+;;compared to its competitor
+to update-market-share
+  let comp1 [total-machines] of company 0
+  let comp2 [total-machines] of company 1
+  let market-share1 comp1 / comp2
+  let market-share2 comp2 / comp1
+  ask company 0 [
+    set market-share market-share1
+  ]
+  ask company 1 [
+    set market-share market-share2
+  ]
 
-
-
-
+end
 
 
 
@@ -547,6 +564,39 @@ machine-cost
 1
 0
 Number
+
+SWITCH
+292
+484
+401
+517
+compete?
+compete?
+0
+1
+-1000
+
+MONITOR
+704
+564
+854
+609
+company 1 market-share
+[market-share] of company 0
+3
+1
+11
+
+MONITOR
+880
+563
+1030
+608
+company 2 market-share
+[market-share] of company 1
+3
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
