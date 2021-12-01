@@ -325,7 +325,7 @@ INPUTBOX
 173
 269
 max-ticks
-10.0
+200.0
 1
 0
 Number
