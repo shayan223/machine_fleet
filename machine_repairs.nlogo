@@ -220,9 +220,9 @@ end
 
 to store
   ask companies [
-    if funds > 0 [
-      set funds (funds - (parts * storage-fees))
-    ]
+    ;if funds > 0 [
+    set funds (funds - (parts * storage-fees))
+    ;]
   ]
 end
 
@@ -357,7 +357,7 @@ INPUTBOX
 173
 269
 max-ticks
-300.0
+100.0
 1
 0
 Number
@@ -379,18 +379,18 @@ INPUTBOX
 91
 339
 starting-funds
-100.0
+1000.0
 1
 0
 Number
 
 INPUTBOX
-103
-280
-180
-340
+111
+488
+188
+548
 starting-stock
-5.0
+20.0
 1
 0
 Number
@@ -442,7 +442,7 @@ INPUTBOX
 107
 547
 target-inventory
-5.0
+20.0
 1
 0
 Number
@@ -483,7 +483,7 @@ INPUTBOX
 241
 692
 storage-fees
-0.5
+1.0
 1
 0
 Number

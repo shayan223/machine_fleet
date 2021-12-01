@@ -220,9 +220,9 @@ end
 
 to store
   ask companies [
-    if funds > 0 [
-      set funds (funds - (parts * storage-fees))
-    ]
+    ;if funds > 0 [
+    set funds (funds - (parts * storage-fees))
+    ;]
   ]
 end
 
@@ -357,7 +357,7 @@ INPUTBOX
 173
 269
 max-ticks
-300.0
+20.0
 1
 0
 Number
@@ -385,10 +385,10 @@ starting-funds
 Number
 
 INPUTBOX
-103
-280
-180
-340
+111
+488
+188
+548
 starting-stock
 5.0
 1
@@ -420,7 +420,7 @@ INPUTBOX
 179
 411
 break-probability
-5.0
+20.0
 1
 0
 Number
@@ -442,7 +442,7 @@ INPUTBOX
 107
 547
 target-inventory
-5.0
+20.0
 1
 0
 Number
@@ -483,7 +483,7 @@ INPUTBOX
 241
 692
 storage-fees
-0.5
+5.0
 1
 0
 Number
@@ -500,10 +500,10 @@ lead-time
 Number
 
 PLOT
-966
-13
-1450
-433
+965
+10
+1248
+232
 Incoming Parts
 NIL
 NIL
@@ -519,10 +519,10 @@ PENS
 "company1" 1.0 0 -13840069 true "" "plot [incoming-parts] of company 1"
 
 PLOT
-657
-468
-986
-705
+959
+260
+1288
+497
 Net Worth
 NIL
 NIL
