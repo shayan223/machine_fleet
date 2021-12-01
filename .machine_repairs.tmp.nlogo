@@ -10,7 +10,7 @@ undirected-link-breed [machine-links machine-link]
 undirected-link-breed [inventory-links inventory-link]
 undirected-link-breed [shipping-links shipping-link]
 
-companies-own [funds parts running-machines incoming-parts]
+companies-own [funds parts running-machines incoming-parts net-worth total-machines]
 machines-own[status break-chance]
 stockers-own[ship-time order-amount newest?]
 
@@ -27,6 +27,9 @@ to setup
     set shape "circle"
     set parts starting-stock
     set funds starting-funds
+    set total-machines initial-machines
+    set net-worth starting-funds
+
   ]
 
   create-companies 1 [
@@ -34,6 +37,9 @@ to setup
     set shape "circle"
     set parts starting-stock
     set funds starting-funds
+    set total-machines initial-machines
+    set net-worth starting-funds
+
   ]
 
   create-machines initial-machines [
@@ -68,6 +74,7 @@ to go
     store
     stock
     buy-machines
+    find-worth
     tick
   ]
 end
@@ -152,17 +159,17 @@ to order
     ;check for edge cases
     if (funds < (part-cost * buy-amount)) or (buy-amount < 0) [set buy-amount 0]
 
-    show who
-    type "buy-amount" type buy-amount
+    ;show who
+    ;type "buy-amount" type buy-amount
 
     if ((parts + incoming-parts) < target-inventory)[
         ask my-shipping-links[ask other-end[
-         if newest? [
-          set purchase-success true
-          set newest? false
-          set ship-time lead-time
-          set order-amount buy-amount
-        ]
+          if newest? [
+            set purchase-success true
+            set newest? false
+            set ship-time lead-time
+            set order-amount buy-amount
+          ]
         ]]
 
 
@@ -219,11 +226,11 @@ to store
   ]
 end
 
-;; If the company has at least 1000 dollars, the company buys another machine at a cost of 500
+;; If the company has at least double the cost of a machine, the company buys another machine at a cost of 500
 to buy-machines
 
   ask company 0 [
-    if funds > 1000 [
+    if funds > (machine-cost * 2)[
       set buyflag0 true
   ]]
 
@@ -234,15 +241,17 @@ to buy-machines
         set color green
         set status "working"
         create-machine-link-with company 0
-    ]
-    ask company 0 [
-      set funds (funds - 500)
-      set buyflag0 false
-    ]
+      ]
+      ask company 0 [
+        set funds (funds - machine-cost)
+        set buyflag0 false
+        set total-machines (total-machines + 1)
+      ]
+
   ]
 
   ask company 1 [
-    if funds > 1000 [
+    if funds > (machine-cost * 2) [
       set buyflag1 true
   ]]
 
@@ -253,14 +262,33 @@ to buy-machines
         set color green
         set status "working"
         create-machine-link-with company 1
-    ]
-    ask company 1 [
-      set funds (funds - 500)
-      set buyflag1 false
-    ]
+      ]
+      ask company 1 [
+        set funds (funds - machine-cost)
+        set buyflag1 false
+        set total-machines (total-machines + 1)
+      ]
   ]
 
 end
+
+
+
+to find-worth
+  ask companies[
+    set net-worth (funds + (total-machines * machine-cost))
+  ]
+end
+
+
+
+
+
+
+
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -329,7 +357,7 @@ INPUTBOX
 173
 269
 max-ticks
-50.0
+300.0
 1
 0
 Number
@@ -488,7 +516,37 @@ false
 "" ""
 PENS
 "company0" 1.0 0 -2674135 true "" "plot [incoming-parts] of company 0"
-"company1" 1.0 0 -14070903 true "" "plot [incoming-parts] of company 1"
+"company1" 1.0 0 -13840069 true "" "plot [incoming-parts] of company 1"
+
+PLOT
+657
+468
+986
+705
+Net Worth
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"company 1" 1.0 0 -2674135 true "" "plot [net-worth] of company 0"
+"company 2" 1.0 0 -13840069 true "" "plot [net-worth] of company 1"
+
+INPUTBOX
+10
+422
+118
+482
+machine-cost
+500.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
