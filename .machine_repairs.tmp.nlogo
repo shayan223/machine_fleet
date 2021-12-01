@@ -138,30 +138,34 @@ to order
     let purchase-success false
 
     let buy-amount 0
-;
-;    carefully[
-;      set buy-amount floor((funds / (target-inventory - (parts + incoming-parts)) * part-cost))
-;      ][set buy-amount 0]
+    let buy-max 0
+    let needed-parts (target-inventory - (parts + incoming-parts))
 
-    if (parts + incoming-parts < target-inventory) [
-       set buy-amount floor((funds / (target-inventory - (parts + incoming-parts)) * part-cost))
-          show who
-    type "buy-amount" type buy-amount
+    ; Find maximum parts a company can afford to buy
+    if ((parts + incoming-parts) < target-inventory) [
+       set buy-max floor(funds / (needed-parts * part-cost))
     ]
 
-;    if funds < (part-cost * buy-amount) or (buy-amount < 0) [set buy-amount 0]
+    ; buy up to either the max afforded parts, or the target-inventory, whichever is lower
+    set buy-amount min (list buy-max needed-parts)
+
+    ;check for edge cases
+    if (funds < (part-cost * buy-amount)) or (buy-amount < 0) [set buy-amount 0]
+
+    show who
+    type "buy-amount" type buy-amount
 
     if ((parts + incoming-parts) < target-inventory)[
         ask my-shipping-links[ask other-end[
-        if newest? [
+         if newest? [
           set purchase-success true
           set newest? false
           set ship-time lead-time
           set order-amount buy-amount
         ]
-      ]]
+        ]]
 
-;       set parts (parts + buy-amount)
+
       if purchase-success[
        set funds (funds - (part-cost * buy-amount))
        set incoming-parts (incoming-parts + buy-amount)
@@ -325,7 +329,7 @@ INPUTBOX
 173
 269
 max-ticks
-200.0
+50.0
 1
 0
 Number
@@ -462,7 +466,7 @@ INPUTBOX
 507
 586
 lead-time
-10.0
+5.0
 1
 0
 Number
