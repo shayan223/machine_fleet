@@ -373,7 +373,7 @@ INPUTBOX
 173
 269
 max-ticks
-100.0
+126.0
 1
 0
 Number
@@ -468,7 +468,7 @@ PLOT
 257
 934
 453
-plot 1
+Company Funds
 Time
 Funds
 0.0
@@ -571,7 +571,7 @@ SWITCH
 517
 compete?
 compete?
-0
+1
 1
 -1000
 
