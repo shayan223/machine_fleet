@@ -305,7 +305,6 @@ end
 
 
 
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -495,10 +494,10 @@ machine-revenue
 Number
 
 INPUTBOX
-0
-632
-241
-692
+173
+554
+266
+614
 storage-fees
 1.0
 1
@@ -506,10 +505,10 @@ storage-fees
 Number
 
 INPUTBOX
-272
-526
-507
-586
+193
+487
+265
+547
 lead-time
 5.0
 1
@@ -940,7 +939,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.2.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
